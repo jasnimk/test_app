@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:test_ecommerce_app/app/controllers/checkout_controller.dart';
 import 'package:test_ecommerce_app/app/controllers/product_controller.dart';
 import 'package:test_ecommerce_app/app/controllers/cart_controller.dart';
+import 'package:test_ecommerce_app/app/models/cart_model.dart';
 import 'package:test_ecommerce_app/app/widgets/custom_appbar.dart';
 import 'package:test_ecommerce_app/app/widgets/custom_button.dart';
 import 'package:test_ecommerce_app/app/widgets/text_style.dart';
@@ -11,6 +13,9 @@ class ProductDetailsScreen extends GetView<ProductController> {
 
   @override
   Widget build(BuildContext context) {
+    final cartController = Get.find<CartController>();
+    final checkoutController = Get.find<CheckoutController>();
+
     return Scaffold(
       appBar: const CustomAppBar(title: 'Product Details'),
       body: Obx(() {
@@ -141,14 +146,29 @@ class ProductDetailsScreen extends GetView<ProductController> {
                       child: CustomButton(
                         text:
                             product.stock > 0 ? 'Add to Cart' : 'Out of Stock',
-                        onPressed: product.stock > 0 ? () {} : null,
+                        onPressed: product.stock > 0
+                            ? () => cartController.addToCart(product, context)
+                            : null,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: CustomButton(
                         text: product.stock > 0 ? 'Buy Now' : 'Out of Stock',
-                        onPressed: product.stock > 0 ? () {} : null,
+                        onPressed: product.stock > 0
+                            ? () async {
+                                final tempCartItem = CartItem(
+                                  id: DateTime.now().toString(),
+                                  product: product,
+                                  quantity: 1,
+                                );
+                                checkoutController
+                                    .setDirectCheckout(tempCartItem);
+
+                                // Navigate to checkout
+                                Get.toNamed('/checkout');
+                              }
+                            : null,
                       ),
                     ),
                   ],

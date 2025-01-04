@@ -26,7 +26,7 @@ class ChipWidget extends StatelessWidget {
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               fontSize: 11.5),
         ),
-        selectedColor: Color.fromARGB(255, 3, 37, 32),
+        selectedColor: Color(0xFF15384E),
         backgroundColor: Colors.grey[200],
         elevation: isSelected ? 5 : 2,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:test_ecommerce_app/app/controllers/auth_controller.dart';
+import 'package:test_ecommerce_app/app/screens/cart_screen.dart';
 import 'package:test_ecommerce_app/app/screens/login_Screen.dart';
 import 'package:test_ecommerce_app/app/screens/product_list_screen.dart';
+import 'package:test_ecommerce_app/app/screens/profile_screen.dart';
 import 'package:test_ecommerce_app/app/widgets/confirmation_Widget.dart';
 import 'package:test_ecommerce_app/app/widgets/custom_appbar.dart';
 
@@ -22,8 +24,8 @@ class BaseScreen extends StatelessWidget {
   final List<Widget> screens = [
     const Scaffold(body: Center(child: Text('Shopping'))),
     const ProductGridView(showAppBar: false),
-    const Scaffold(body: Center(child: Text('Cart'))),
-    const Scaffold(body: Center(child: Text('Profile'))),
+    CartScreen(),
+    ProfileView()
   ];
 
   BaseScreen({Key? key}) : super(key: key);

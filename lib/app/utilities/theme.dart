@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const mainColor = Color.fromARGB(255, 3, 37, 32);
+  static const mainColor = Color(0xFF15384E);
 
   static ThemeData lightTheme = ThemeData(
     primaryColor: mainColor,
     colorScheme: ColorScheme.light(
       primary: mainColor,
-      secondary: mainColor.withOpacity(0.8),
+      secondary: mainColor.withValues(),
       surface: Colors.white,
-      background: Colors.grey[50]!,
     ),
     iconTheme: IconThemeData(color: Colors.white),
     appBarTheme: AppBarTheme(
@@ -32,13 +31,12 @@ class AppTheme {
   );
 
   static ThemeData darkTheme = ThemeData.dark().copyWith(
-    primaryColor: mainColor,
+    primaryColor: const Color.fromARGB(255, 255, 255, 255),
     colorScheme: ColorScheme.dark(
-      primary: mainColor,
-      secondary: mainColor.withOpacity(0.8),
+      primary: const Color.fromARGB(255, 79, 89, 95),
+      secondary: const Color.fromARGB(255, 192, 203, 210).withValues(),
       surface: Color(0xFF1E1E1E),
-      background: Color(0xFF121212),
     ),
-    iconTheme: IconThemeData(color: Colors.white),
+    iconTheme: IconThemeData(color: Color(0xFF15384E)),
   );
 }

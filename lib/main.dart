@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
+import 'package:test_ecommerce_app/app/data/consts.dart';
 import 'package:test_ecommerce_app/app/data/product.dart';
+import 'package:test_ecommerce_app/app/screens/add_address.dart';
+import 'package:test_ecommerce_app/app/screens/added_to_cart_success.dart';
 import 'package:test_ecommerce_app/app/screens/base_screen.dart';
+import 'package:test_ecommerce_app/app/screens/checkout_screen.dart';
 import 'package:test_ecommerce_app/app/screens/login_Screen.dart';
+import 'package:test_ecommerce_app/app/screens/order_placed.dart';
 import 'package:test_ecommerce_app/app/screens/phone_login.dart';
 import 'package:test_ecommerce_app/app/screens/product_list_screen.dart';
+import 'package:test_ecommerce_app/app/screens/select_Sddress.dart';
 import 'package:test_ecommerce_app/app/screens/signup_screen.dart';
 import 'package:test_ecommerce_app/app/screens/splash_screen.dart';
 import 'package:test_ecommerce_app/app/screens/verify_otp.dart';
@@ -33,6 +40,10 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/verify-otp', page: () => VerifyOTPScreen()),
         GetPage(name: '/home', page: () => BaseScreen()),
         GetPage(name: '/phone-login', page: () => PhoneLoginScreen()),
+        GetPage(name: '/checkout', page: () => CheckoutScreen()),
+        GetPage(name: '/order-success', page: () => OrderPlaced()),
+        GetPage(name: '/select-address', page: () => AddressSelectionPage()),
+        GetPage(name: '/add-address', page: () => AddAddressView()),
       ],
     );
   }
@@ -40,6 +51,8 @@ class MyApp extends StatelessWidget {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // await Stripe.instance.applySettings();
+  Stripe.publishableKey = stripePublishableKey;
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

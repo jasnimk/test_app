@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:test_ecommerce_app/app/widgets/text_style.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -14,7 +13,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.actions,
     this.leading,
-    this.backgroundColor = const Color.fromARGB(255, 3, 37, 32),
+    this.backgroundColor = const Color.fromRGBO(21, 56, 78, 1),
     this.elevation = 4.0,
   }) : super(key: key);
 
