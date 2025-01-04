@@ -1,11 +1,11 @@
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/bindings_interface.dart';
-import 'package:test_ecommerce_app/app/controllers/product_details_coontroller.dart';
+import 'package:test_ecommerce_app/app/controllers/auth_controller.dart';
+import 'package:test_ecommerce_app/app/controllers/product_controller.dart';
 
-class ProductDetailsBinding extends Bindings {
+class ProductBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut(() => ProductDetailsController());
+    Get.put(ProductController());
+    Get.put(AuthController());
   }
 }

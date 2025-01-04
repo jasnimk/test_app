@@ -25,7 +25,7 @@ class AppTextStyles {
       color: Colors.grey,
     ),
   );
-  static final TextStyle headline = GoogleFonts.lato(
+  static final TextStyle headline = GoogleFonts.montserrat(
     textStyle: const TextStyle(
       fontSize: 32,
       fontWeight: FontWeight.bold,
@@ -33,7 +33,7 @@ class AppTextStyles {
     ),
   );
 
-  static final TextStyle bodyText = GoogleFonts.roboto(
+  static final TextStyle bodyText = GoogleFonts.montserrat(
     textStyle: const TextStyle(
       fontSize: 13,
       fontWeight: FontWeight.normal,
@@ -41,7 +41,7 @@ class AppTextStyles {
     ),
   );
 
-  static final TextStyle caption = GoogleFonts.openSans(
+  static final TextStyle caption = GoogleFonts.montserrat(
     textStyle: const TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.w300,

@@ -1,0 +1,31 @@
+class ProductInfoText extends StatelessWidget {
+  final String label;
+  final String content;
+  final TextStyle labelStyle;
+  final TextStyle contentStyle;
+
+  const ProductInfoText({
+    Key? key,
+    required this.label,
+    required this.content,
+    required this.labelStyle,
+    required this.contentStyle,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: labelStyle,
+        ),
+        Text(
+          content,
+          style: contentStyle,
+        ),
+      ],
+    );
+  }
+}

@@ -1,126 +1,156 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:test_ecommerce_app/app/data/product.dart';
-import 'package:test_ecommerce_app/app/models/product_model.dart';
+import 'package:test_ecommerce_app/app/controllers/product_controller.dart';
 import 'package:test_ecommerce_app/app/screens/product_details_screen.dart';
-import 'package:test_ecommerce_app/app/services/bindings.dart';
+import 'package:test_ecommerce_app/app/widgets/chip_widget.dart';
 import 'package:test_ecommerce_app/app/widgets/custom_appbar.dart';
 import 'package:test_ecommerce_app/app/widgets/text_style.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
-class CustomProductGridView extends StatefulWidget {
-  final List<Map<String, dynamic>> products;
-  const CustomProductGridView({Key? key, required this.products})
-      : super(key: key);
+class ProductGridView extends GetView<ProductController> {
+  final bool showAppBar;
 
-  @override
-  _CustomProductGridViewState createState() => _CustomProductGridViewState();
-}
-
-class _CustomProductGridViewState extends State<CustomProductGridView>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late List<Product> _products;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: Duration(milliseconds: 800),
-      vsync: this,
-    );
-    _controller.forward();
-    _products = widget.products.map((map) => Product.fromMap(map)).toList();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  const ProductGridView({
+    Key? key,
+    this.showAppBar = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'Jewels Online'),
-      body: GridView.builder(
-        padding: EdgeInsets.all(16),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 0.75,
-        ),
-        itemCount: widget.products.length,
-        itemBuilder: (context, index) {
-          final product = _products[index];
-          return GestureDetector(
-            onTap: () {
-              // Navigator.of(context).push(
-              //   MaterialPageRoute(
-              //     builder: (ctx) => ProductDetailsScreen(),
-              //   ),
-              // );
+      appBar: showAppBar ? const CustomAppBar(title: 'Jewels Online') : null,
+      body: Column(
+        children: [
+          SizedBox(
+            height: 50,
+            child: Obx(() {
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: controller.categories.length,
+                itemBuilder: (context, index) {
+                  final category = controller.categories[index];
+                  return Obx(() {
+                    final isSelected = category == 'All Products'
+                        ? controller.selectedCategory.value.isEmpty
+                        : controller.selectedCategory.value == category;
 
-              Get.to(() => ProductDetailsScreen(),
-                  binding: ProductDetailsBinding(),
-                  arguments: {'productId': product.id});
-            },
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                final delay = (index / widget.products.length) * 0.4;
-                final animationValue =
-                    (_controller.value - delay).clamp(0.0, 1.0);
-                return Transform.translate(
-                  offset: Offset(0, 30 * (1.0 - animationValue)),
-                  child: Opacity(
-                    opacity: animationValue,
-                    child: child,
+                    return ChipWidget(
+                      category: category,
+                      isSelected: isSelected,
+                      onTap: () {
+                        controller.selectedCategory.value =
+                            category == 'All Products' ? '' : category;
+                        controller.fetchProducts();
+                      },
+                    );
+                  });
+                },
+              );
+            }),
+          ),
+          Expanded(
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              return AnimationLimiter(
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.75,
                   ),
-                );
-              },
-              child: Card(
-                elevation: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Image.asset(
-                        product.imageUrls[0],
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      ),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              product.name,
-                              style: AppTextStyles.caption,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                  itemCount: controller.productsList.length,
+                  itemBuilder: (context, index) {
+                    final product = controller.productsList[index];
+                    return AnimationConfiguration.staggeredGrid(
+                      position: index,
+                      duration: const Duration(milliseconds: 800),
+                      columnCount: 2,
+                      child: ScaleAnimation(
+                        child: FadeInAnimation(
+                          child: GestureDetector(
+                            onTap: () {
+                              controller.fetchProductDetails(product.id!);
+                              Get.to(() => const ProductDetailsScreen());
+                            },
+                            child: SizedBox(
+                              child: Card(
+                                elevation: 4,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Image.asset(
+                                        product.imageUrls[0],
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    product.name,
+                                                    style: AppTextStyles.caption
+                                                        .copyWith(fontSize: 13),
+                                                    maxLines: 3,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    '₹${product.price.toStringAsFixed(2)}',
+                                                    style: AppTextStyles
+                                                        .bodyText
+                                                        .copyWith(fontSize: 12),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            IconButton(
+                                                onPressed: () {},
+                                                icon: FaIcon(
+                                                    FontAwesomeIcons
+                                                        .cartShopping,
+                                                    size:
+                                                        18, // Increase size for better visibility
+                                                    color: Color.fromARGB(
+                                                        255, 3, 37, 32)))
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                            SizedBox(height: 4),
-                            Text(
-                              '₹${product.price.toStringAsFixed(2)}',
-                              style: AppTextStyles.bodyText,
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              ),
-            ),
-          );
-        },
+              );
+            }),
+          ),
+        ],
       ),
     );
   }
