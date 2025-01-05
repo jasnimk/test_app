@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test_ecommerce_app/app/models/product_model.dart';
+import 'package:test_ecommerce_app/app/widgets/custom_snackbar.dart';
 
 class ProductController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -9,6 +10,7 @@ class ProductController extends GetxController {
   final RxList<Product> productsList = <Product>[].obs;
   final RxString selectedCategory = ''.obs;
   final RxList<String> categories = <String>[].obs;
+  final RxList similarProducts = [].obs;
 
   // Product Details Related
   final pageController = PageController();
@@ -19,6 +21,40 @@ class ProductController extends GetxController {
   void onInit() {
     super.onInit();
     initializeData();
+  }
+
+  Future fetchSimilarProducts(String currentProductId) async {
+    try {
+      isLoading.value = true;
+
+      // Get the category of the current product first
+      final currentProduct = selectedProduct.value;
+      if (currentProduct == null) return;
+
+      // Query products in the same category, excluding current product
+      final QuerySnapshot snapshot = await _firestore
+          .collection('products')
+          .where('category', isEqualTo: currentProduct.category)
+          .where(FieldPath.documentId, isNotEqualTo: currentProductId)
+          .limit(10) // Limit to prevent loading too many products
+          .get();
+
+      similarProducts.value = snapshot.docs.map((doc) {
+        return Product.fromMap(
+          doc.data() as Map<String, dynamic>,
+          id: doc.id,
+        );
+      }).toList();
+    } catch (e) {
+      print('Error fetching similar products: $e');
+      showCustomSnackbar(
+        title: '',
+        message: 'Failed to fetch similar products',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> initializeData() async {
@@ -76,9 +112,9 @@ class ProductController extends GetxController {
       }).toList();
     } catch (e) {
       print('Error fetching products: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to fetch products',
+      showCustomSnackbar(
+        title: '',
+        message: 'Failed to fetch products',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -97,18 +133,19 @@ class ProductController extends GetxController {
           doc.data() as Map<String, dynamic>,
           id: doc.id,
         );
+        await fetchSimilarProducts(productId);
       } else {
-        Get.snackbar(
-          'Error',
-          'Product not found',
+        showCustomSnackbar(
+          title: '',
+          message: 'Product not found',
           snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
       print('Error fetching product details: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to load product details',
+      showCustomSnackbar(
+        title: '',
+        message: 'Failed to load product details',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {

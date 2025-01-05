@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:test_ecommerce_app/app/controllers/auth_controller.dart';
 import 'package:test_ecommerce_app/app/screens/cart_screen.dart';
+import 'package:test_ecommerce_app/app/screens/home_screen.dart';
 import 'package:test_ecommerce_app/app/screens/login_Screen.dart';
 import 'package:test_ecommerce_app/app/screens/product_list_screen.dart';
 import 'package:test_ecommerce_app/app/screens/profile_screen.dart';
@@ -22,7 +23,7 @@ class BaseScreen extends StatelessWidget {
   ];
 
   final List<Widget> screens = [
-    const Scaffold(body: Center(child: Text('Shopping'))),
+    HomeScreen(),
     const ProductGridView(showAppBar: false),
     CartScreen(),
     ProfileView()

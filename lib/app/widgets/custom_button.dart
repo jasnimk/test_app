@@ -47,6 +47,7 @@
 //       );
 // }
 import 'package:flutter/material.dart';
+import 'package:test_ecommerce_app/app/widgets/text_style.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -83,7 +84,8 @@ class CustomButton extends StatelessWidget {
               ),
               child: isLoading
                   ? CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).primaryColor),
                     )
                   : Text(text),
             )
@@ -99,7 +101,8 @@ class CustomButton extends StatelessWidget {
                     )
                   : Text(
                       text,
-                      style: TextStyle(color: textColor),
+                      style: AppTextStyles.montserratBold
+                          .copyWith(fontSize: 14, color: Colors.white),
                     ),
             ),
     );

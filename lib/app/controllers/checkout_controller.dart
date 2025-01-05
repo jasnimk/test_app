@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:test_ecommerce_app/app/controllers/cart_controller.dart';
 import 'package:test_ecommerce_app/app/models/cart_model.dart';
 import 'package:test_ecommerce_app/app/services/stripe_service.dart';
+import 'package:test_ecommerce_app/app/widgets/custom_snackbar.dart';
 
 class CheckoutController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -67,10 +68,9 @@ class CheckoutController extends GetxController {
         }
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to load addresses: $e',
-        snackPosition: SnackPosition.BOTTOM,
+      showCustomSnackbar(
+        title: '', message: 'Failed to load addresses: $e',
+        //snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
       isLoading(false);
@@ -79,9 +79,9 @@ class CheckoutController extends GetxController {
 
   Future<void> processOrder() async {
     if (selectedAddressId.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please select a delivery address',
+      showCustomSnackbar(
+        title: '',
+        message: 'Please select a delivery address',
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -102,9 +102,9 @@ class CheckoutController extends GetxController {
     }
 
     if (itemsToProcess.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'No items to process',
+      showCustomSnackbar(
+        title: '',
+        message: 'No items to process',
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -143,9 +143,9 @@ class CheckoutController extends GetxController {
 
       Get.offNamed('/order-success', arguments: orderId);
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to process order: ${e.toString()}',
+      showCustomSnackbar(
+        title: '',
+        message: 'Failed to process order: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
@@ -188,5 +188,37 @@ class CheckoutController extends GetxController {
 
     await orderRef.set(orderData);
     return orderRef.id;
+  }
+
+  Future<void> refreshAddresses() async {
+    try {
+      isLoading.value = true;
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('addresses')
+            .orderBy('createdAt', descending: true)
+            .get();
+
+        addresses.value = snapshot.docs.map((doc) {
+          final data = doc.data();
+          return {
+            'id': doc.id,
+            ...data,
+          };
+        }).toList();
+
+        // If there's no selected address but addresses exist, select the first one
+        if (selectedAddressId.isEmpty && addresses.isNotEmpty) {
+          selectedAddressId.value = addresses[0]['id'];
+        }
+      }
+    } catch (e) {
+      print('Error refreshing addresses: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

@@ -4,13 +4,20 @@ class CartItem {
   final String id;
   final Product product;
   int quantity;
+  final bool isOffer;
 
-  double get totalPrice => product.price * quantity;
+  double get totalPrice {
+    if (isOffer) {
+      return 0;
+    }
+    return product.price * quantity;
+  }
 
   CartItem({
     required this.id,
     required this.product,
     this.quantity = 1,
+    this.isOffer = false,
   });
 
   Map<String, dynamic> toMap() {

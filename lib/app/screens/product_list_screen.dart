@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:test_ecommerce_app/app/controllers/cart_controller.dart';
 import 'package:test_ecommerce_app/app/controllers/product_controller.dart';
 import 'package:test_ecommerce_app/app/screens/product_details_screen.dart';
 import 'package:test_ecommerce_app/app/widgets/chip_widget.dart';
@@ -18,6 +19,9 @@ class ProductGridView extends GetView<ProductController> {
 
   @override
   Widget build(BuildContext context) {
+    final cartController = Get.find<CartController>();
+    final loadingStates = <String, RxBool>{}.obs;
+
     return Scaffold(
       appBar: showAppBar ? const CustomAppBar(title: 'Jewels Online') : null,
       body: Column(
@@ -68,6 +72,11 @@ class ProductGridView extends GetView<ProductController> {
                   itemCount: controller.productsList.length,
                   itemBuilder: (context, index) {
                     final product = controller.productsList[index];
+                    // Initialize loading state for this product if not exists
+                    if (!loadingStates.containsKey(product.id)) {
+                      loadingStates[product.id!] = false.obs;
+                    }
+
                     return AnimationConfiguration.staggeredGrid(
                       position: index,
                       duration: const Duration(milliseconds: 800),
@@ -124,15 +133,58 @@ class ProductGridView extends GetView<ProductController> {
                                                 ],
                                               ),
                                             ),
-                                            IconButton(
-                                                onPressed: () {},
-                                                icon: FaIcon(
-                                                    FontAwesomeIcons
-                                                        .cartShopping,
-                                                    size:
-                                                        18, // Increase size for better visibility
-                                                    color: Color.fromARGB(
-                                                        255, 3, 37, 32)))
+                                            Obx(() {
+                                              final isLoading =
+                                                  loadingStates[product.id]
+                                                          ?.value ??
+                                                      false;
+                                              return isLoading
+                                                  ? const SizedBox(
+                                                      width: 20,
+                                                      height: 20,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        valueColor:
+                                                            AlwaysStoppedAnimation<
+                                                                Color>(
+                                                          Color.fromARGB(
+                                                              255, 3, 37, 32),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : IconButton(
+                                                      onPressed:
+                                                          product.stock > 0
+                                                              ? () async {
+                                                                  loadingStates[
+                                                                          product
+                                                                              .id]
+                                                                      ?.value = true;
+                                                                  try {
+                                                                    await cartController
+                                                                        .addToCart(
+                                                                      product,
+                                                                      context,
+                                                                      fromProductPage:
+                                                                          false,
+                                                                    );
+                                                                  } finally {
+                                                                    loadingStates[
+                                                                            product.id]
+                                                                        ?.value = false;
+                                                                  }
+                                                                }
+                                                              : null,
+                                                      icon: FaIcon(
+                                                        FontAwesomeIcons
+                                                            .cartShopping,
+                                                        size: 18,
+                                                        color: Color.fromARGB(
+                                                            255, 3, 37, 32),
+                                                      ),
+                                                    );
+                                            }),
                                           ],
                                         ),
                                       ),

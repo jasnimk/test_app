@@ -5,7 +5,7 @@ import 'package:test_ecommerce_app/app/widgets/add_on_widgets.dart';
 import 'package:test_ecommerce_app/app/widgets/custom_button.dart';
 
 class CartScreen extends StatelessWidget {
-  final CartController cartController = Get.find<CartController>();
+  final CartController controller = Get.find<CartController>();
 
   CartScreen({Key? key}) : super(key: key);
 
@@ -13,11 +13,11 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        if (cartController.isLoading) {
+        if (controller.isLoading) {
           return buildLoadingIndicator(context: context);
         }
 
-        if (cartController.items.isEmpty) {
+        if (controller.items.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -44,9 +44,9 @@ class CartScreen extends StatelessWidget {
             children: [
               Expanded(
                 child: ListView.builder(
-                  itemCount: cartController.items.length,
+                  itemCount: controller.items.length,
                   itemBuilder: (context, index) {
-                    final item = cartController.items[index];
+                    final item = controller.items[index];
                     return Card(
                       margin: const EdgeInsets.all(8),
                       child: Padding(
@@ -109,11 +109,14 @@ class CartScreen extends StatelessWidget {
                                                 size: 16,
                                                 color: Colors.black,
                                               ),
-                                              onPressed: () =>
-                                                  cartController.updateQuantity(
-                                                      item,
-                                                      item.quantity - 1,
-                                                      context),
+                                              onPressed: controller
+                                                      .canUpdateQuantity(item)
+                                                  ? () =>
+                                                      controller.updateQuantity(
+                                                          item,
+                                                          item.quantity - 1,
+                                                          context)
+                                                  : null,
                                             ),
                                             Text(
                                               '${item.quantity}',
@@ -126,11 +129,14 @@ class CartScreen extends StatelessWidget {
                                                 size: 16,
                                                 color: Colors.black,
                                               ),
-                                              onPressed: () =>
-                                                  cartController.updateQuantity(
-                                                      item,
-                                                      item.quantity + 1,
-                                                      context),
+                                              onPressed: controller
+                                                      .canUpdateQuantity(item)
+                                                  ? () =>
+                                                      controller.updateQuantity(
+                                                          item,
+                                                          item.quantity + 1,
+                                                          context)
+                                                  : null,
                                             ),
                                           ],
                                         ),
@@ -139,7 +145,7 @@ class CartScreen extends StatelessWidget {
                                       IconButton(
                                         icon: const Icon(Icons.delete_outline,
                                             color: Colors.red),
-                                        onPressed: () => cartController
+                                        onPressed: () => controller
                                             .removeFromCart(context, item),
                                       ),
                                     ],
@@ -174,18 +180,17 @@ class CartScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Actual Amount:'),
-                        Text(
-                            '₹${cartController.actualAmount.toStringAsFixed(2)}'),
+                        Text('₹${controller.actualAmount.toStringAsFixed(2)}'),
                       ],
                     ),
-                    if (cartController.discountAmount > 0) ...[
+                    if (controller.discountAmount > 0) ...[
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text('Discount:'),
                           Text(
-                            '-₹${cartController.discountAmount.toStringAsFixed(2)}',
+                            '-₹${controller.discountAmount.toStringAsFixed(2)}',
                             style: const TextStyle(color: Colors.green),
                           ),
                         ],
@@ -203,7 +208,7 @@ class CartScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '₹${cartController.totalAmount.toStringAsFixed(2)}',
+                          '₹${controller.totalAmount.toStringAsFixed(2)}',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,

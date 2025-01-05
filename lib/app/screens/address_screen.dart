@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:test_ecommerce_app/app/controllers/address_controller.dart';
 import 'package:test_ecommerce_app/app/screens/add_address.dart';
+import 'package:test_ecommerce_app/app/widgets/add_on_widgets.dart';
+import 'package:test_ecommerce_app/app/widgets/text_style.dart';
 
 class AddressListView extends StatelessWidget {
   final AddressController addressController = Get.find<AddressController>();
@@ -14,35 +16,17 @@ class AddressListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shipping Addresses'),
+        title: Text('Shipping Addresses', style: AppTextStyles.montserratBold),
         elevation: 0,
       ),
       body: Obx(() {
         if (addressController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return buildLoadingIndicator(context: context);
         }
 
         if (addressController.addresses.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.location_off_outlined,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No addresses found',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          );
+          return buildEmptyStateWidget(
+              message: 'NO ADDRESSES FOUND!', subMessage: 'Add Now!');
         }
 
         return ListView.separated(
@@ -65,14 +49,7 @@ class AddressListView extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          address['name'] ?? '',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 19,
-                            fontFamily: 'Poppins-SemiBold',
-                          ),
-                        ),
+                        Text(address['name'] ?? '', style: styling()),
                         PopupMenuButton(
                           iconColor: Colors.black,
                           itemBuilder: (context) => [
@@ -110,7 +87,10 @@ class AddressListView extends StatelessWidget {
                                               userId, address['id']);
                                           Get.back();
                                         },
-                                        child: const Text('Delete'),
+                                        child: Text(
+                                          'Delete',
+                                          style: styling(),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -127,12 +107,12 @@ class AddressListView extends StatelessWidget {
                       '${address['locality']}\n'
                       '${address['district']}, ${address['city']}\n'
                       '${address['state']} - ${address['pincode']}',
-                      style: const TextStyle(height: 1.5),
+                      style: styling(),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Phone: ${address['phone']}',
-                      style: const TextStyle(
+                      style: styling(
                         color: Colors.grey,
                       ),
                     ),

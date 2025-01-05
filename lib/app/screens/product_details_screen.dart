@@ -4,6 +4,8 @@ import 'package:test_ecommerce_app/app/controllers/checkout_controller.dart';
 import 'package:test_ecommerce_app/app/controllers/product_controller.dart';
 import 'package:test_ecommerce_app/app/controllers/cart_controller.dart';
 import 'package:test_ecommerce_app/app/models/cart_model.dart';
+import 'package:test_ecommerce_app/app/screens/similar_products.dart';
+import 'package:test_ecommerce_app/app/widgets/add_on_widgets.dart';
 import 'package:test_ecommerce_app/app/widgets/custom_appbar.dart';
 import 'package:test_ecommerce_app/app/widgets/custom_button.dart';
 import 'package:test_ecommerce_app/app/widgets/text_style.dart';
@@ -20,7 +22,7 @@ class ProductDetailsScreen extends GetView<ProductController> {
       appBar: const CustomAppBar(title: 'Product Details'),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return buildLoadingIndicator(context: context);
         }
 
         final product = controller.selectedProduct.value;
@@ -165,7 +167,6 @@ class ProductDetailsScreen extends GetView<ProductController> {
                                 checkoutController
                                     .setDirectCheckout(tempCartItem);
 
-                                // Navigate to checkout
                                 Get.toNamed('/checkout');
                               }
                             : null,
@@ -174,6 +175,8 @@ class ProductDetailsScreen extends GetView<ProductController> {
                   ],
                 ),
               ),
+              Divider(),
+              SimilarProductsList(currentProductId: product.id!),
             ],
           ),
         );

@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:get/get.dart';
 import 'package:test_ecommerce_app/app/data/consts.dart';
-import 'package:test_ecommerce_app/app/data/product.dart';
 import 'package:test_ecommerce_app/app/screens/add_address.dart';
-import 'package:test_ecommerce_app/app/screens/added_to_cart_success.dart';
 import 'package:test_ecommerce_app/app/screens/base_screen.dart';
 import 'package:test_ecommerce_app/app/screens/checkout_screen.dart';
+import 'package:test_ecommerce_app/app/screens/home_screen.dart';
 import 'package:test_ecommerce_app/app/screens/login_Screen.dart';
 import 'package:test_ecommerce_app/app/screens/order_placed.dart';
 import 'package:test_ecommerce_app/app/screens/phone_login.dart';
-import 'package:test_ecommerce_app/app/screens/product_list_screen.dart';
 import 'package:test_ecommerce_app/app/screens/select_Sddress.dart';
 import 'package:test_ecommerce_app/app/screens/signup_screen.dart';
 import 'package:test_ecommerce_app/app/screens/splash_screen.dart';
@@ -27,7 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialBinding: ProductBinding(),
+      initialBinding: AppBinding(),
       //home: const ProductGridView(),
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
@@ -44,6 +42,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/order-success', page: () => OrderPlaced()),
         GetPage(name: '/select-address', page: () => AddressSelectionPage()),
         GetPage(name: '/add-address', page: () => AddAddressView()),
+        GetPage(name: '/home', page: () => const HomeScreen()),
       ],
     );
   }

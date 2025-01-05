@@ -64,7 +64,7 @@ class AddressSelectionPage extends StatelessWidget {
                 onChanged: (value) {
                   if (value != null) {
                     checkoutController.selectedAddressId.value = value;
-                    Get.back();
+                    Get.back(result: true);
                   }
                 },
               ),

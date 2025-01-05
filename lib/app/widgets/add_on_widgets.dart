@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:test_ecommerce_app/app/widgets/text_style.dart';
 
@@ -85,5 +86,72 @@ buildEmptyStateWidget({
               style: AppTextStyles.bodyText.copyWith(fontSize: 14)),
       ],
     ),
+  );
+}
+
+TextStyle headerStyling({
+  String fontFamily = 'Montserrat', // Use a string font family name instead
+  double fontSize = 20.0,
+  FontWeight fontWeight = FontWeight.normal,
+  Color color = const Color(0xFF000000),
+  FontStyle fontStyle = FontStyle.normal,
+  double letterSpacing = 0.0,
+  double wordSpacing = 0.0,
+  TextDecoration decoration = TextDecoration.none,
+}) {
+  return GoogleFonts.getFont(fontFamily).copyWith(
+    // Use GoogleFonts to get the correct font
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+    fontStyle: fontStyle,
+    letterSpacing: letterSpacing,
+    wordSpacing: wordSpacing,
+    decoration: decoration,
+  );
+}
+
+TextStyle subHeaderStyling({
+  String fontFamily = 'Poppins-SemiBold',
+  double fontSize = 16.0,
+  FontWeight fontWeight = FontWeight.normal,
+  Color color = Colors.grey,
+  FontStyle fontStyle = FontStyle.normal,
+  double letterSpacing = 0.0,
+  double wordSpacing = 0.0,
+  TextDecoration decoration = TextDecoration.none,
+}) {
+  return TextStyle(
+    fontFamily: fontFamily,
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+    fontStyle: fontStyle,
+    letterSpacing: letterSpacing,
+    wordSpacing: wordSpacing,
+    decoration: decoration,
+  );
+}
+
+TextStyle styling({
+  String fontFamily = 'Poppins',
+  double fontSize = 14.0,
+  FontWeight fontWeight = FontWeight.normal,
+  Color? color = const Color(0xFF000000),
+  FontStyle fontStyle = FontStyle.normal,
+  double letterSpacing = 0.0,
+  double wordSpacing = 0.0,
+  TextDecoration decoration = TextDecoration.none,
+  double? height,
+}) {
+  return GoogleFonts.getFont(fontFamily).copyWith(
+    // Use GoogleFonts to get the correct font
+    fontSize: fontSize,
+    fontWeight: fontWeight,
+    color: color,
+    fontStyle: fontStyle,
+    letterSpacing: letterSpacing,
+    wordSpacing: wordSpacing,
+    decoration: decoration,
   );
 }

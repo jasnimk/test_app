@@ -51,6 +51,7 @@ dependencies:
   carousel_slider: ^5.0.0
   flutter_stripe: ^11.3.0
   dio: ^5.7.0
+  animate_do: ^3.3.4
 
 dev_dependencies:
   flutter_test:
@@ -111,6 +112,7 @@ flutter:
     - assets/Images/set4-2.jpg
     - assets/Images/profile.png
     - assets/Images/logo.png
+    - assets/Images/logoraw.png
     - assets/animations/Animation - 1735364832916.json
     - assets/animations/Animation - 1735366182958.json
     - assets/animations/Animation - 1735834409097.json

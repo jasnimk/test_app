@@ -1,89 +1,14 @@
-// // profile_controller.dart
-// import 'package:get/get.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart';
-
-// class ProfileController extends GetxController {
-//   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-//   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-//   final Rx<User?> user = Rx<User?>(null);
-//   final RxMap<String, dynamic> userData = RxMap<String, dynamic>();
-//   final RxInt ordersCount = 0.obs;
-//   final RxInt addressCount = 0.obs;
-//   final RxDouble walletBalance = 0.0.obs;
-//   final RxBool isLoading = false.obs;
-
-//   @override
-//   void onInit() {
-//     super.onInit();
-//     user.value = _auth.currentUser;
-//     loadUserData();
-//     loadCounts();
-//   }
-
-//   Future<void> loadUserData() async {
-//     if (user.value != null) {
-//       try {
-//         isLoading.value = true;
-//         final doc =
-//             await _firestore.collection('users').doc(user.value!.uid).get();
-//         if (doc.exists) {
-//           userData.value = doc.data() ?? {};
-//         }
-//       } catch (e) {
-//         Get.snackbar('Error', 'Failed to load user data');
-//       } finally {
-//         isLoading.value = false;
-//       }
-//     }
-//   }
-
-//   Future<void> loadCounts() async {
-//     if (user.value != null) {
-//       try {
-//         final ordersSnapshot = await _firestore
-//             .collection('users')
-//             .doc(user.value!.uid)
-//             .collection('orders')
-//             .get();
-//         ordersCount.value = ordersSnapshot.docs.length;
-
-//         final addressSnapshot = await _firestore
-//             .collection('users')
-//             .doc(user.value!.uid)
-//             .collection('addresses')
-//             .get();
-//         addressCount.value = addressSnapshot.docs.length;
-
-//         // Load wallet balance
-//         final walletDoc = await _firestore
-//             .collection('users')
-//             .doc(user.value!.uid)
-//             .collection('wallet')
-//             .doc('balance')
-//             .get();
-//         if (walletDoc.exists) {
-//           walletBalance.value =
-//               (walletDoc.data()?['balance'] ?? 0.0).toDouble();
-//         }
-//       } catch (e) {
-//         Get.snackbar('Error', 'Failed to load user statistics');
-//       }
-//     }
-//   }
-// }
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:test_ecommerce_app/app/widgets/custom_snackbar.dart';
 
 class ProfileController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final Rx<User?> user = Rx<User?>(null);
-  // Changed from RxMap<String, dynamic> to just RxMap to match Firestore data
-  final RxMap userData = RxMap();
+  final RxMap<String, dynamic> userData = RxMap<String, dynamic>();
   final RxInt ordersCount = 0.obs;
   final RxInt addressCount = 0.obs;
   final RxDouble walletBalance = 0.0.obs;
@@ -93,71 +18,135 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     user.value = _auth.currentUser;
-    loadUserData();
-    loadCounts();
+    initializeUserData();
   }
 
-  Future<void> loadUserData() async {
+  Future<void> initializeUserData() async {
     if (user.value != null) {
       try {
         isLoading.value = true;
-        final doc =
+
+        // Check if user document exists
+        final userDoc =
             await _firestore.collection('users').doc(user.value!.uid).get();
-        if (doc.exists) {
-          userData.value = doc.data() ?? {};
+
+        if (!userDoc.exists) {
+          // If user document doesn't exist, create it with default data
+          await _firestore.collection('users').doc(user.value!.uid).set({
+            'email': user.value!.email ?? '',
+            'name': user.value!.displayName ?? 'User',
+            'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
         }
+
+        // Now fetch all user data
+        await fetchData();
       } catch (e) {
-        print('Error loading user data: $e');
-        Get.snackbar('Error', 'Failed to load user data');
+        print('Error initializing user data: $e');
+        showCustomSnackbar(
+          title: '',
+          message: 'Failed to initialize user data',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       } finally {
         isLoading.value = false;
       }
     }
   }
 
-  Future<void> loadCounts() async {
+  Future<void> fetchData() async {
     if (user.value != null) {
       try {
-        // Query orders from separate collection where userId matches
-        final ordersSnapshot = await _firestore
+        isLoading.value = true;
+
+        final userDocFuture =
+            _firestore.collection('users').doc(user.value!.uid).get();
+        final ordersFuture = _firestore
             .collection('orders')
             .where('userId', isEqualTo: user.value!.uid)
             .get();
-        ordersCount.value = ordersSnapshot.docs.length;
-
-        final addressSnapshot = await _firestore
+        final addressFuture = _firestore
             .collection('users')
             .doc(user.value!.uid)
             .collection('addresses')
             .get();
-        addressCount.value = addressSnapshot.docs.length;
 
-        // Load wallet balance
-        final walletDoc = await _firestore
-            .collection('users')
-            .doc(user.value!.uid)
-            .collection('wallet')
-            .doc('balance')
-            .get();
-        if (walletDoc.exists) {
-          walletBalance.value =
-              (walletDoc.data()?['balance'] ?? 0.0).toDouble();
-        }
+        final results = await Future.wait([
+          userDocFuture,
+          ordersFuture,
+          addressFuture,
+        ]);
+
+        final userDoc = results[0] as DocumentSnapshot;
+        final ordersSnapshot = results[1] as QuerySnapshot;
+        final addressSnapshot = results[2] as QuerySnapshot;
+
+        if (userDoc.exists) {
+          userData.value = userDoc.data() as Map<String, dynamic>;
+        } else {}
+
+        ordersCount.value = ordersSnapshot.docs.length;
+        addressCount.value = addressSnapshot.docs.length;
       } catch (e) {
-        print('Error loading counts: $e');
-        Get.snackbar('Error', 'Failed to load user statistics');
+        print('Error fetching data: $e');
+        showCustomSnackbar(
+          title: '',
+          message: 'Failed to fetch profile data',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } finally {
+        isLoading.value = false;
       }
     }
   }
 
-  // Helper method to safely access user data
-  dynamic getUserData(String key) {
-    return userData[key];
+  String getUserName() {
+    final name = userData['username'];
+
+    return name ?? 'User';
   }
 
-  // Method to refresh data
+  String getUserEmail() {
+    final email = userData['email'];
+    return email ?? user.value?.email ?? 'No email';
+  }
+
+  Future<void> updateUserProfile({String? name, String? email}) async {
+    try {
+      isLoading.value = true;
+
+      final updateData = <String, dynamic>{
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      if (name != null) updateData['name'] = name;
+      if (email != null) updateData['email'] = email;
+
+      await _firestore
+          .collection('users')
+          .doc(user.value!.uid)
+          .update(updateData);
+
+      await fetchData();
+
+      showCustomSnackbar(
+        title: '',
+        message: 'Profile updated successfully',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (e) {
+      showCustomSnackbar(
+        title: '',
+        message: 'Failed to update profile',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   Future<void> refreshData() async {
-    await loadUserData();
-    await loadCounts();
+    await fetchData();
   }
 }

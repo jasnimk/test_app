@@ -48,4 +48,12 @@ class AppTextStyles {
       color: Colors.blueGrey,
     ),
   );
+
+  static final TextStyle errorStyle = GoogleFonts.montserrat(
+    textStyle: const TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w300,
+      color: Color.fromARGB(255, 152, 65, 65),
+    ),
+  );
 }

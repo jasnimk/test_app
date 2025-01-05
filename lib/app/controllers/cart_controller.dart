@@ -6,6 +6,7 @@ import 'package:test_ecommerce_app/app/models/cart_model.dart';
 import 'package:test_ecommerce_app/app/models/product_model.dart';
 import 'package:test_ecommerce_app/app/screens/added_to_cart_success.dart';
 import 'package:test_ecommerce_app/app/widgets/confirmation_Widget.dart';
+import 'package:test_ecommerce_app/app/widgets/custom_snackbar.dart';
 
 class CartController extends GetxController {
   final RxList<CartItem> _items = <CartItem>[].obs;
@@ -15,7 +16,7 @@ class CartController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool get isLoading => _isLoading.value;
-  List<CartItem> get items => _items;
+  List<CartItem> get items => _items.toList();
 
   int get itemCount => _items.length;
 
@@ -24,7 +25,12 @@ class CartController extends GetxController {
   }
 
   double get subtotal {
-    return _items.fold(0.0, (sum, item) => sum + item.totalPrice);
+    return _items.fold(0.0, (sum, item) {
+      if (item.isOffer) {
+        return sum + 0;
+      }
+      return sum + (item.product.price * item.quantity);
+    });
   }
 
   double get totalAmount => subtotal;
@@ -36,6 +42,119 @@ class CartController extends GetxController {
 
   double get discountAmount => actualAmount - totalAmount;
 
+  // Check if item is a gift/offer product
+  bool isGiftProduct(CartItem item) {
+    return item.isOffer;
+  }
+
+  // Check if quantity update is allowed
+  bool canUpdateQuantity(CartItem item) {
+    return !isGiftProduct(item);
+  }
+
+  Future<void> updateQuantity(
+      CartItem item, int newQuantity, BuildContext context) async {
+    if (item.isOffer) {
+      Get.closeAllSnackbars();
+
+      showCustomSnackbar(title: '', message: 'Sorry, CAnnot Modify Gift!');
+      return;
+    }
+
+    try {
+      _isLoading.value = true;
+      if (newQuantity <= 0) {
+        await removeFromCart(context, item);
+        return;
+      }
+
+      final userId = _auth.currentUser?.uid;
+      if (userId == null) return;
+
+      final quantityDifference = newQuantity - item.quantity;
+
+      if (quantityDifference > 0) {
+        final hasStock =
+            await checkStockAvailability(item.product.id!, quantityDifference);
+        if (!hasStock) {
+          Get.closeAllSnackbars();
+          showCustomSnackbar(
+              title: '', message: 'Insufficient stock available');
+          return;
+        }
+      }
+
+      await updateProductStock(item.product.id!, quantityDifference);
+
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('cart')
+          .doc(item.id)
+          .update({'quantity': newQuantity});
+
+      final index = _items.indexWhere((i) => i.id == item.id);
+      if (index >= 0) {
+        _items[index].quantity = newQuantity;
+        _items.refresh();
+      }
+    } catch (e) {
+      Get.closeAllSnackbars();
+      showCustomSnackbar(title: '', message: 'Failed to update quantity!');
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  Future<void> removeFromCart(BuildContext context, CartItem item) async {
+    if (item.isOffer) {
+      Get.closeAllSnackbars();
+      showCustomSnackbar(
+          title: '', message: 'Gift products cannot be removed from cart!');
+
+      return;
+    }
+    final bool? confirmed = await ConfirmationDialog.show(
+      context: context,
+      title: 'Remove Item',
+      content:
+          'Are you sure you want to remove ${item.product.name} from your cart?',
+      confirmText: 'Remove',
+      cancelText: 'Keep',
+      onConfirm: () async {
+        try {
+          _isLoading.value = true;
+          final userId = _auth.currentUser?.uid;
+          if (userId == null) return;
+
+          await updateProductStock(item.product.id!, -item.quantity);
+
+          await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection('cart')
+              .doc(item.id)
+              .delete();
+
+          _items.removeWhere((i) => i.id == item.id);
+          showCustomSnackbar(title: '', message: 'Removed from Cart!');
+        } catch (e) {
+          showCustomSnackbar(title: '', message: 'Failed to remove item');
+        } finally {
+          _isLoading.value = false;
+        }
+      },
+    );
+
+    if (confirmed ?? false) {}
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadCartFromFirestore();
+  }
+
   Future<bool> checkStockAvailability(
       String productId, int requestedQuantity) async {
     try {
@@ -44,9 +163,13 @@ class CartController extends GetxController {
       if (!productDoc.exists) return false;
 
       final currentStock = productDoc.data()?['stock'] as int? ?? 0;
+      print(
+          'Product $productId - Current Stock: $currentStock, Requested: $requestedQuantity'); // Debug log
       return currentStock >= requestedQuantity;
     } catch (e) {
-      Get.snackbar('Error', 'Failed to check stock availability');
+      print('Stock check error: $e'); // Debug log
+      showCustomSnackbar(
+          title: '', message: 'Error, Failed to check stock availability');
       return false;
     }
   }
@@ -71,45 +194,46 @@ class CartController extends GetxController {
         transaction.update(productRef, {'stock': newStock});
       });
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update product stock');
-      throw e;
+      print('Stock update error: $e'); // Add logging for debugging
+      showCustomSnackbar(
+          title: '', message: 'Failed to update product stock: $e');
+      throw e; // Re-throw to handle in calling code
     }
   }
 
   Future<String> addToCart(Product product, BuildContext context,
       {bool fromProductPage = true}) async {
     try {
+      _isLoading.value = true;
       final userId = _auth.currentUser?.uid;
       if (userId == null) {
-        Get.snackbar('Error', 'Please login to add items to cart');
+        showCustomSnackbar(title: '', message: 'Verification Failed!');
+        ('Error', 'Please login to add items to cart');
         return '';
       }
 
-      // First check if the item exists in Firestore
       final existingCartQuery = await _firestore
           .collection('users')
           .doc(userId)
           .collection('cart')
           .where('productId', isEqualTo: product.id)
+          .where('isOffer', isEqualTo: false) // Only match non-offer items
           .get();
 
       if (existingCartQuery.docs.isNotEmpty) {
-        // Item exists in Firestore
         final existingCartDoc = existingCartQuery.docs.first;
         final currentQuantity = existingCartDoc.data()['quantity'] as int;
         final newQuantity = currentQuantity + 1;
 
-        // Check stock availability before updating
         final hasStock = await checkStockAvailability(product.id!, newQuantity);
         if (!hasStock) {
-          Get.snackbar('Error', 'Insufficient stock available');
+          showCustomSnackbar(
+              title: '', message: 'Insufficient stock available!');
           return '';
         }
 
-        // Update stock in Firestore
         await updateProductStock(product.id!, 1);
 
-        // Update cart item in Firestore
         await _firestore
             .collection('users')
             .doc(userId)
@@ -117,18 +241,17 @@ class CartController extends GetxController {
             .doc(existingCartDoc.id)
             .update({'quantity': newQuantity});
 
-        // Update local cart items
-        final index =
-            _items.indexWhere((item) => item.product.id == product.id);
+        final index = _items.indexWhere(
+            (item) => item.product.id == product.id && !(item.isOffer));
         if (index >= 0) {
           _items[index].quantity = newQuantity;
           _items.refresh();
         } else {
-          // If item exists in Firestore but not in local list, add it
           final cartItem = CartItem(
             id: existingCartDoc.id,
             product: product,
             quantity: newQuantity,
+            isOffer: false,
           );
           _items.add(cartItem);
         }
@@ -140,18 +263,14 @@ class CartController extends GetxController {
 
         return existingCartDoc.id;
       } else {
-        // New item
-        // Check stock availability for new item
         final hasStock = await checkStockAvailability(product.id!, 1);
         if (!hasStock) {
-          Get.snackbar('Error', 'Product out of stock');
+          showCustomSnackbar(title: '', message: 'Product out of stock!');
           return '';
         }
 
-        // Update stock in Firestore
         await updateProductStock(product.id!, 1);
 
-        // Create new cart item
         final cartRef =
             _firestore.collection('users').doc(userId).collection('cart').doc();
 
@@ -159,11 +278,13 @@ class CartController extends GetxController {
           id: cartRef.id,
           product: product,
           quantity: 1,
+          isOffer: false,
         );
 
         await cartRef.set({
           'productId': product.id,
           'quantity': 1,
+          'isOffer': false,
           'addedAt': FieldValue.serverTimestamp(),
         });
 
@@ -177,85 +298,50 @@ class CartController extends GetxController {
         return cartRef.id;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to add item to cart');
+      showCustomSnackbar(title: '', message: 'Failed to add item to cart!');
       return '';
+    } finally {
+      _isLoading.value = false;
     }
   }
 
-  Future<void> updateQuantity(
-      CartItem item, int newQuantity, BuildContext context) async {
+  Future<String> addToCartWithOffer(
+      Product product, BuildContext context) async {
     try {
-      if (newQuantity <= 0) {
-        await removeFromCart(context, item);
-        return;
-      }
-
+      _isLoading.value = true;
       final userId = _auth.currentUser?.uid;
-      if (userId == null) return;
-
-      // Calculate quantity change
-      final quantityDifference = newQuantity - item.quantity;
-
-      // Check stock if increasing quantity
-      if (quantityDifference > 0) {
-        final hasStock =
-            await checkStockAvailability(item.product.id!, quantityDifference);
-        if (!hasStock) {
-          Get.snackbar('Error', 'Insufficient stock available');
-          return;
-        }
+      if (userId == null) {
+        showCustomSnackbar(
+            title: '', message: 'Please Login to add items to cart!');
+        return '';
       }
 
-      // Update stock in Firestore
-      await updateProductStock(item.product.id!, quantityDifference);
+      final cartRef =
+          _firestore.collection('users').doc(userId).collection('cart').doc();
 
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .collection('cart')
-          .doc(item.id)
-          .update({'quantity': newQuantity});
+      final cartItem = CartItem(
+        id: cartRef.id,
+        product: product,
+        quantity: 1,
+        isOffer: true,
+      );
 
-      final index = _items.indexOf(item);
-      _items[index].quantity = newQuantity;
-      _items.refresh();
+      await cartRef.set({
+        'productId': product.id,
+        'quantity': 1,
+        'isOffer': true,
+        'addedAt': FieldValue.serverTimestamp(),
+      });
+
+      _items.add(cartItem);
+      return cartRef.id;
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update quantity');
+      showCustomSnackbar(
+          title: '', message: 'Failed to add offer item to cart!');
+      return '';
+    } finally {
+      _isLoading.value = false;
     }
-  }
-
-  Future<void> removeFromCart(BuildContext context, CartItem item) async {
-    final bool? confirmed = await ConfirmationDialog.show(
-      context: context,
-      title: 'Remove Item',
-      content:
-          'Are you sure you want to remove ${item.product.name} from your cart?',
-      confirmText: 'Remove',
-      cancelText: 'Keep',
-      onConfirm: () async {
-        try {
-          final userId = _auth.currentUser?.uid;
-          if (userId == null) return;
-
-          // Return stock when removing item
-          await updateProductStock(item.product.id!, -item.quantity);
-
-          await _firestore
-              .collection('users')
-              .doc(userId)
-              .collection('cart')
-              .doc(item.id)
-              .delete();
-
-          _items.remove(item);
-          Get.snackbar('Success', '${item.product.name} removed from cart');
-        } catch (e) {
-          Get.snackbar('Error', 'Failed to remove item');
-        }
-      },
-    );
-
-    if (confirmed ?? false) {}
   }
 
   Future<void> clearCart() async {
@@ -263,9 +349,10 @@ class CartController extends GetxController {
       final userId = _auth.currentUser?.uid;
       if (userId == null) return;
 
-      // Return stock for all items
       for (var item in _items) {
-        await updateProductStock(item.product.id!, -item.quantity);
+        if (!(item.isOffer)) {
+          await updateProductStock(item.product.id!, -item.quantity);
+        }
       }
 
       final batch = _firestore.batch();
@@ -282,7 +369,7 @@ class CartController extends GetxController {
 
       _items.clear();
     } catch (e) {
-      Get.snackbar('Error', 'Failed to clear cart');
+      showCustomSnackbar(title: '', message: 'Failed to clear cart');
     }
   }
 
@@ -291,7 +378,10 @@ class CartController extends GetxController {
       _isLoading.value = true;
 
       final userId = _auth.currentUser?.uid;
-      if (userId == null) return;
+      if (userId == null) {
+        _items.clear();
+        return;
+      }
 
       final cartSnapshot = await _firestore
           .collection('users')
@@ -316,20 +406,15 @@ class CartController extends GetxController {
             id: doc.id,
             product: product,
             quantity: data['quantity'] ?? 1,
+            isOffer: data['isOffer'] ?? false,
           );
           _items.add(cartItem);
         }
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load cart');
+      showCustomSnackbar(title: '', message: 'Failed to load Cart!');
     } finally {
       _isLoading.value = false;
     }
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-    loadCartFromFirestore();
   }
 }
