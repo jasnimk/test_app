@@ -13,8 +13,6 @@ import 'package:test_ecommerce_app/app/widgets/custom_appbar.dart';
 class BaseScreen extends StatelessWidget {
   final RxInt currentIndex = 0.obs;
   final AuthController authController = Get.find<AuthController>();
-
-  // List of screen titles corresponding to bottom nav items
   final List<String> titles = [
     'Jewels Online',
     'Shopping',

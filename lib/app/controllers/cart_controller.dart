@@ -163,11 +163,16 @@ class CartController extends GetxController {
       if (!productDoc.exists) return false;
 
       final currentStock = productDoc.data()?['stock'] as int? ?? 0;
-      print(
-          'Product $productId - Current Stock: $currentStock, Requested: $requestedQuantity'); // Debug log
-      return currentStock >= requestedQuantity;
+
+      final existingCartItem = _items.firstWhereOrNull(
+        (item) => item.product.id == productId && !item.isOffer,
+      );
+      if (existingCartItem != null) {
+        return currentStock >= requestedQuantity;
+      } else {
+        return currentStock > 0;
+      }
     } catch (e) {
-      print('Stock check error: $e'); // Debug log
       showCustomSnackbar(
           title: '', message: 'Error, Failed to check stock availability');
       return false;
@@ -194,10 +199,9 @@ class CartController extends GetxController {
         transaction.update(productRef, {'stock': newStock});
       });
     } catch (e) {
-      print('Stock update error: $e'); // Add logging for debugging
       showCustomSnackbar(
           title: '', message: 'Failed to update product stock: $e');
-      throw e; // Re-throw to handle in calling code
+      throw e;
     }
   }
 
@@ -208,7 +212,6 @@ class CartController extends GetxController {
       final userId = _auth.currentUser?.uid;
       if (userId == null) {
         showCustomSnackbar(title: '', message: 'Verification Failed!');
-        ('Error', 'Please login to add items to cart');
         return '';
       }
 
@@ -217,15 +220,14 @@ class CartController extends GetxController {
           .doc(userId)
           .collection('cart')
           .where('productId', isEqualTo: product.id)
-          .where('isOffer', isEqualTo: false) // Only match non-offer items
+          .where('isOffer', isEqualTo: false)
           .get();
 
       if (existingCartQuery.docs.isNotEmpty) {
         final existingCartDoc = existingCartQuery.docs.first;
         final currentQuantity = existingCartDoc.data()['quantity'] as int;
         final newQuantity = currentQuantity + 1;
-
-        final hasStock = await checkStockAvailability(product.id!, newQuantity);
+        final hasStock = await checkStockAvailability(product.id!, 1);
         if (!hasStock) {
           showCustomSnackbar(
               title: '', message: 'Insufficient stock available!');

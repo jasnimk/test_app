@@ -45,7 +45,6 @@ class SimilarProductsList extends StatelessWidget {
                   final product = controller.similarProducts[index];
                   return GestureDetector(
                     onTap: () {
-                      // Navigate to product details
                       controller.fetchProductDetails(product.id!);
                       Get.toNamed('/ProductDetailsScreen');
                     },
@@ -86,8 +85,7 @@ class SimilarProductsList extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    product
-                                        .name, // Changed from productName to name
+                                    product.name,
                                     style: AppTextStyles.montserratBold
                                         .copyWith(
                                             fontSize: 14, color: Colors.black),

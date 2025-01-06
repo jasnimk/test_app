@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:test_ecommerce_app/app/controllers/profile_controller.dart';
 import 'package:test_ecommerce_app/app/screens/address_screen.dart';
+import 'package:test_ecommerce_app/app/screens/order_screen.dart';
 import 'package:test_ecommerce_app/app/widgets/text_style.dart';
 
 class ProfileView extends StatelessWidget {
@@ -25,7 +26,7 @@ class ProfileView extends StatelessWidget {
               _buildProfileTile(
                 title: 'Order History',
                 subtitle: '${controller.ordersCount} Orders',
-                onTap: () {},
+                onTap: () => Get.to(() => OrdersScreen()),
               ),
               _buildProfileTile(
                 title: 'Shipping Addresses',

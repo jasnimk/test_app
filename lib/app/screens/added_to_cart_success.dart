@@ -19,7 +19,7 @@ class CartSucces extends StatelessWidget {
                   'assets/animations/Animation - 1735834409097.json')),
           const SizedBox(height: 20),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(28.0),
             child: Row(
               children: [
                 Expanded(

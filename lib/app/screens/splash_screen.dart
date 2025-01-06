@@ -9,13 +9,10 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Introduce a delay before navigation
     Future.delayed(const Duration(seconds: 3), () {
       if (authController.user.value != null) {
-        // User is logged in, navigate to home
         Get.offAllNamed('/home');
       } else {
-        // No user logged in, navigate to login
         Get.offAllNamed('/login');
       }
     });

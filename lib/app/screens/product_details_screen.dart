@@ -145,32 +145,36 @@ class ProductDetailsScreen extends GetView<ProductController> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: CustomButton(
-                        text:
-                            product.stock > 0 ? 'Add to Cart' : 'Out of Stock',
-                        onPressed: product.stock > 0
-                            ? () => cartController.addToCart(product, context)
-                            : null,
-                      ),
+                      child: Obx(() => CustomButton(
+                            text: product.stock > 0
+                                ? 'Add to Cart'
+                                : 'Out of Stock',
+                            onPressed: product.stock > 0
+                                ? () =>
+                                    cartController.addToCart(product, context)
+                                : null,
+                            isLoading: cartController.isLoading,
+                          )),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: CustomButton(
-                        text: product.stock > 0 ? 'Buy Now' : 'Out of Stock',
-                        onPressed: product.stock > 0
-                            ? () async {
-                                final tempCartItem = CartItem(
-                                  id: DateTime.now().toString(),
-                                  product: product,
-                                  quantity: 1,
-                                );
-                                checkoutController
-                                    .setDirectCheckout(tempCartItem);
-
-                                Get.toNamed('/checkout');
-                              }
-                            : null,
-                      ),
+                      child: Obx(() => CustomButton(
+                            text:
+                                product.stock > 0 ? 'Buy Now' : 'Out of Stock',
+                            onPressed: product.stock > 0
+                                ? () async {
+                                    final tempCartItem = CartItem(
+                                      id: DateTime.now().toString(),
+                                      product: product,
+                                      quantity: 1,
+                                    );
+                                    checkoutController
+                                        .setDirectCheckout(tempCartItem);
+                                    Get.toNamed('/checkout');
+                                  }
+                                : null,
+                            isLoading: cartController.isLoading,
+                          )),
                     ),
                   ],
                 ),

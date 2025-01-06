@@ -215,8 +215,6 @@ class CheckoutController extends GetxController {
           selectedAddressId.value = addresses[0]['id'];
         }
       }
-    } catch (e) {
-      print('Error refreshing addresses: $e');
     } finally {
       isLoading.value = false;
     }

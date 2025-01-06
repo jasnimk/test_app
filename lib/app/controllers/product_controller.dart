@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -46,7 +47,6 @@ class ProductController extends GetxController {
         );
       }).toList();
     } catch (e) {
-      print('Error fetching similar products: $e');
       showCustomSnackbar(
         title: '',
         message: 'Failed to fetch similar products',
@@ -89,7 +89,9 @@ class ProductController extends GetxController {
       // Add "All Products" as the first option and sort the rest
       categories.value = ['All Products', ...uniqueCategories.toList()..sort()];
     } catch (e) {
-      print('Error fetching categories: $e');
+      if (kDebugMode) {
+        print('Error fetching categories: $e');
+      }
     }
   }
 
@@ -111,7 +113,6 @@ class ProductController extends GetxController {
         );
       }).toList();
     } catch (e) {
-      print('Error fetching products: $e');
       showCustomSnackbar(
         title: '',
         message: 'Failed to fetch products',
@@ -142,7 +143,6 @@ class ProductController extends GetxController {
         );
       }
     } catch (e) {
-      print('Error fetching product details: $e');
       showCustomSnackbar(
         title: '',
         message: 'Failed to load product details',

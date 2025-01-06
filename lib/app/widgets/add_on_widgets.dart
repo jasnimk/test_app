@@ -56,8 +56,8 @@ Widget customSpinkitLoaderWithType({
 buildLoadingIndicator({
   required BuildContext context,
   SpinkitType type = SpinkitType.threeBounce,
-  Color color = const Color.fromARGB(255, 241, 241, 241),
-  double size = 30.0,
+  Color color = const Color(0xFF15384E),
+  double size = 20.0,
 }) {
   return Center(
     child: customSpinkitLoaderWithType(
@@ -90,7 +90,7 @@ buildEmptyStateWidget({
 }
 
 TextStyle headerStyling({
-  String fontFamily = 'Montserrat', // Use a string font family name instead
+  String fontFamily = 'Montserrat',
   double fontSize = 20.0,
   FontWeight fontWeight = FontWeight.normal,
   Color color = const Color(0xFF000000),
@@ -100,7 +100,6 @@ TextStyle headerStyling({
   TextDecoration decoration = TextDecoration.none,
 }) {
   return GoogleFonts.getFont(fontFamily).copyWith(
-    // Use GoogleFonts to get the correct font
     fontSize: fontSize,
     fontWeight: fontWeight,
     color: color,
@@ -145,7 +144,6 @@ TextStyle styling({
   double? height,
 }) {
   return GoogleFonts.getFont(fontFamily).copyWith(
-    // Use GoogleFonts to get the correct font
     fontSize: fontSize,
     fontWeight: fontWeight,
     color: color,

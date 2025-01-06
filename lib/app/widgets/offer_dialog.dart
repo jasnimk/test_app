@@ -1,4 +1,3 @@
-// welcome_offer_dialog.dart
 import 'package:flutter/material.dart';
 import 'package:test_ecommerce_app/app/models/product_model.dart';
 

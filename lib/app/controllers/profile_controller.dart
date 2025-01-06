@@ -26,12 +26,10 @@ class ProfileController extends GetxController {
       try {
         isLoading.value = true;
 
-        // Check if user document exists
         final userDoc =
             await _firestore.collection('users').doc(user.value!.uid).get();
 
         if (!userDoc.exists) {
-          // If user document doesn't exist, create it with default data
           await _firestore.collection('users').doc(user.value!.uid).set({
             'email': user.value!.email ?? '',
             'name': user.value!.displayName ?? 'User',
@@ -40,10 +38,8 @@ class ProfileController extends GetxController {
           });
         }
 
-        // Now fetch all user data
         await fetchData();
       } catch (e) {
-        print('Error initializing user data: $e');
         showCustomSnackbar(
           title: '',
           message: 'Failed to initialize user data',
@@ -89,7 +85,6 @@ class ProfileController extends GetxController {
         ordersCount.value = ordersSnapshot.docs.length;
         addressCount.value = addressSnapshot.docs.length;
       } catch (e) {
-        print('Error fetching data: $e');
         showCustomSnackbar(
           title: '',
           message: 'Failed to fetch profile data',

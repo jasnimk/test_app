@@ -1,47 +1,3 @@
-// import 'package:flutter/material.dart';
-
-// class CustomTextFormField extends StatelessWidget {
-//   final TextEditingController controller;
-//   final String label;
-//   final String? Function(String?) validator;
-//   final TextInputType keyboardType;
-//   final bool obscureText;
-//   final String? hint;
-//   final Widget? suffixicon;
-//     final Widget? prefixIcon;
-
-//   const CustomTextFormField({
-//     Key? key,
-//     required this.controller,
-//     required this.label,
-//     required this.validator,
-//     this.keyboardType = TextInputType.text,
-//     this.obscureText = false,
-//     this.hint,
-//     this.suffixicon,
-//     this.prefixIcon
-//   }) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return TextFormField(
-//       controller: controller,
-//       decoration: InputDecoration(
-//         labelText: label,
-//         hintText:hint ,
-//         suffixIcon: suffixicon,
-//         prefixIcon: prefixIcon,
-//         border: OutlineInputBorder(),
-//         focusedBorder: OutlineInputBorder(
-//           borderSide: BorderSide(color: Theme.of(context).primaryColor),
-//         ),
-//       ),
-//       validator: validator,
-//       keyboardType: keyboardType,
-//       obscureText: obscureText,
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:test_ecommerce_app/app/widgets/text_style.dart';
 
@@ -74,7 +30,7 @@ class CustomTextFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       style: AppTextStyles.montserratBold.copyWith(
-        color: Colors.white, // Customize the input text color
+        color: Colors.white,
         fontSize: 14,
       ),
       decoration: InputDecoration(
@@ -88,19 +44,17 @@ class CustomTextFormField extends StatelessWidget {
           borderSide: BorderSide(color: Colors.white),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-              color: const Color.fromARGB(
-                  255, 178, 174, 174)), // Border color when not focused
+          borderSide:
+              BorderSide(color: const Color.fromARGB(255, 178, 174, 174)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide:
-              BorderSide(color: Colors.white), // Border color when focused
+          borderSide: BorderSide(color: Colors.white),
         ),
         errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red), // Border color for error
+          borderSide: BorderSide(color: Colors.red),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red), // Focused error border
+          borderSide: BorderSide(color: Colors.red),
         ),
       ),
       validator: validator,

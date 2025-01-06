@@ -18,7 +18,7 @@ class CategoryProductsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ProductController controller = Get.find<ProductController>();
     final cartController = Get.find<CartController>();
-    // Add RxMap to track loading state for each product
+
     final loadingStates = <String, RxBool>{}.obs;
     return Scaffold(
       appBar: AppBar(

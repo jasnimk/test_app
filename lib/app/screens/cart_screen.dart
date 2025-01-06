@@ -19,27 +19,30 @@ class CartScreen extends StatelessWidget {
 
         if (controller.items.isEmpty) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                buildEmptyStateWidget(
-                    message: 'NO Products Yet',
-                    subMessage: 'Start Shopping now!'),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CustomButton(
-                    text: 'Back To Shopping',
-                    onPressed: () => Get.back(),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  buildEmptyStateWidget(
+                      message: 'NO Products Yet',
+                      subMessage: 'Start Shopping now!'),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CustomButton(
+                      text: 'Back To Shopping',
+                      onPressed: () => Get.back(),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         }
 
         return Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
               Expanded(
@@ -54,7 +57,6 @@ class CartScreen extends StatelessWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Product Image
                             Container(
                               width: 100,
                               height: 100,
@@ -71,7 +73,6 @@ class CartScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            // Product Details
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +161,6 @@ class CartScreen extends StatelessWidget {
                   },
                 ),
               ),
-              // Cart Summary
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -221,7 +221,6 @@ class CartScreen extends StatelessWidget {
                     CustomButton(
                       text: 'Proceed to Checkout',
                       onPressed: () {
-                        // Add checkout navigation
                         Get.toNamed('/checkout');
                       },
                     ),

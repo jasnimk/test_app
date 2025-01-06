@@ -1234,15 +1234,12 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Validate email
       if (!GetUtils.isEmail(email)) {
         throw 'Invalid email format';
       }
 
-      // Format and validate phone
       final formattedPhone = formatIndianPhoneNumber(phone);
 
-      // Check if email/phone already exists
       if (await isEmailTaken(email)) {
         throw 'Email already in use';
       }
@@ -1250,7 +1247,6 @@ class AuthController extends GetxController {
         throw 'Phone number already in use';
       }
 
-      // Create user with email/password
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -1323,35 +1319,6 @@ class AuthController extends GetxController {
     }
   }
 
-  // // Helper method to complete signup process
-  // Future<void> _completeSignup({
-  //   required PhoneAuthCredential credential,
-  //   required String uid,
-  //   required String username,
-  //   required String email,
-  //   required String phone,
-  // }) async {
-  //   try {
-  //     // Link phone credential with email account
-  //     await _auth.currentUser?.linkWithCredential(credential);
-
-  //     // Save user data
-  //     await _firestore.collection('users').doc(uid).set({
-  //       'username': username,
-  //       'email': email,
-  //       'phone': phone,
-  //       'createdAt': FieldValue.serverTimestamp(),
-  //     });
-
-  //      showCustomSnackbar(title: '', message: 'Verification Failed!');('Success', 'Account created successfully');
-  //     Get.offAllNamed('/home');
-  //   } catch (e) {
-  //      showCustomSnackbar(title: '', message: 'Verification Failed!');('Error', 'Failed to complete signup');
-  //     throw e;
-  //   }
-  // }
-
-  // Sign Out
   Future<void> signOut() async {
     try {
       await _auth.signOut();

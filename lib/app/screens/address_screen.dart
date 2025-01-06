@@ -80,9 +80,8 @@ class AddressListView extends StatelessWidget {
                                       ),
                                       TextButton(
                                         onPressed: () {
-                                          final String userId = _auth
-                                              .currentUser!
-                                              .uid; // Replace with actual user ID
+                                          final String userId =
+                                              _auth.currentUser!.uid;
                                           addressController.deleteAddress(
                                               userId, address['id']);
                                           Get.back();
